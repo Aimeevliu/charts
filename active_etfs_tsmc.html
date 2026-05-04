@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>主動式 ETF × 台積電持股比例</title>
+<style>
+  /* BI Taiwan 色票
+     #002AFF BI 藍｜#6C59E6 深紫｜#9C80E3 淡紫｜#D7AEE8 粉紫 */
+  :root {
+    --bi-blue: #002AFF;
+    --deep-purple: #6C59E6;
+    --light-purple: #9C80E3;
+    --pink-purple: #D7AEE8;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --line: #d7aee866;  /* 粉紫低透明，當分隔線 */
+  }
+  *,*::before,*::after { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Heiti TC",
+                 "Microsoft JhengHei", sans-serif;
+    margin: 0; padding: 2rem 1rem;
+    background: transparent;
+    color: var(--ink); line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  header {
+    margin-bottom: 1.6rem;
+    border-bottom: 2px solid var(--bi-blue);
+    padding-bottom: 1rem;
+  }
+  h1 {
+    font-size: 1.7rem; font-weight: 700; margin: 0 0 0.4rem;
+    letter-spacing: 0.02em; color: var(--bi-blue);
+  }
+  .subtitle { color: var(--ink); font-size: 0.95rem; }
+  .meta { color: var(--muted); font-size: 0.82rem; margin-top: 0.4rem; }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem; margin: 1.2rem 0;
+  }
+  .stat-card {
+    border: 1px solid var(--pink-purple);
+    padding: 0.75rem 1rem; border-radius: 6px;
+    background: rgba(215,174,232,0.12);
+  }
+  .stat-card .label { font-size: 0.78rem; color: var(--muted); }
+  .stat-card .value {
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--deep-purple); margin-top: 0.2rem;
+  }
+
+  .tabs { display: flex; gap: 0.4rem; margin: 1rem 0; }
+  .tab {
+    padding: 0.45rem 1.1rem; cursor: pointer; font-size: 0.9rem;
+    border: 1.5px solid var(--pink-purple); border-radius: 999px;
+    color: var(--deep-purple); background: transparent;
+    transition: all 0.15s ease;
+  }
+  .tab:hover:not(.active) {
+    background: rgba(215,174,232,0.2); border-color: var(--light-purple);
+  }
+  .tab.active {
+    color: #fff; font-weight: 600;
+    background: var(--deep-purple); border-color: var(--deep-purple);
+  }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.92rem;
+    background: rgba(255,255,255,0.6); border-radius: 6px; overflow: hidden;
+  }
+  th, td {
+    padding: 0.7rem 0.75rem; text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  th {
+    background: var(--bi-blue); color: #fff;
+    font-weight: 600; font-size: 0.85rem;
+    border-bottom: none; letter-spacing: 0.02em;
+  }
+  th.sortable { cursor: pointer; user-select: none; position: relative; }
+  th.sortable::after {
+    content: " ⇅"; opacity: 0.5; font-size: 0.78rem;
+  }
+  th.sortable.sort-asc::after { content: " ▲"; opacity: 1; }
+  th.sortable.sort-desc::after { content: " ▼"; opacity: 1; }
+  th.sortable:hover { background: #001fcc; }
+  tr:hover td { background: rgba(215,174,232,0.18); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .idx { color: var(--muted); font-size: 0.85rem; }
+  .ticker {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-weight: 600; color: var(--bi-blue); font-size: 0.92rem;
+  }
+  .issuer { color: var(--muted); font-size: 0.88rem; }
+  .small { font-size: 0.82rem; color: var(--muted); }
+
+  .weight-high { color: var(--bi-blue); font-weight: 700; }
+  .weight-mid { color: var(--deep-purple); font-weight: 600; }
+  .weight-low { color: var(--light-purple); }
+  .weight-none { color: #b3b3b3; font-style: italic; }
+
+  .trend { text-align: center; white-space: nowrap; }
+  .trend-up { color: var(--bi-blue); font-weight: 500; }
+  .trend-down { color: var(--deep-purple); font-weight: 500; }
+  .trend-flat { color: var(--muted); }
+  .trend-meta { color: #b3b3b3; font-size: 0.78rem; margin-left: 0.4rem; }
+  .corr { font-variant-numeric: tabular-nums; }
+  .corr-high { color: var(--bi-blue); font-weight: 600; }
+  .corr-mid { color: var(--deep-purple); font-weight: 500; }
+  .corr-low { color: var(--muted); }
+  .ret-up { color: var(--bi-blue); font-weight: 500; }
+  .ret-down { color: var(--deep-purple); font-weight: 500; }
+  .ret-flat { color: var(--muted); }
+
+  footer {
+    margin-top: 1.5rem; padding-top: 1rem;
+    border-top: 1px solid var(--pink-purple);
+    color: var(--muted); font-size: 0.82rem; line-height: 1.7;
+  }
+  footer p { margin: 0.2rem 0; }
+  .legend { color: var(--muted); font-size: 0.82rem; }
+  .legend span { margin-right: 0.8rem; }
+  .legend .swatch {
+    display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 2px;
+    margin-right: 0.25rem; vertical-align: middle;
+  }
+
+  @media (max-width: 720px) {
+    body { padding: 1rem 0.5rem; }
+    th, td { padding: 0.5rem 0.4rem; font-size: 0.85rem; }
+    .issuer, .small { display: none; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>主動式 ETF × 台積電（2330）持股比例</h1>
+    <div class="subtitle">每日追蹤 15 檔主動 ETF 的台積電配置權重與股數變化</div>
+  </header>
+
+  <section class="stats">
+    <div class="stat-card"><div class="label">主動 ETF 檔數</div><div class="value">15</div></div>
+    <div class="stat-card"><div class="label">台積電 2026-04-30 漲跌</div><div class="value">-2.06%</div></div>
+    <div class="stat-card"><div class="label">單檔最高權重</div><div class="value">28.43%</div></div>
+    <div class="stat-card"><div class="label">有持有檔平均</div><div class="value">10.53%</div></div>
+  </section>
+
+  <table id="etf-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>代號</th>
+        <th>ETF 名稱</th>
+        <th class="num sortable" data-col="3" data-default="desc">2330 股數</th>
+        <th class="num sortable" data-col="4" data-default="desc">2330 權重</th>
+        <th>當天增減</th>
+        <th class="num sortable" data-col="6" data-default="desc">當日漲跌</th>
+        <th class="num sortable" data-col="7" data-default="desc">扣台積電後漲跌</th>
+        <th class="num">整體持股</th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+      
+        <tr data-cat="台股">
+            <td class="num idx">1</td>
+            <td class="ticker">00985A</td>
+            <td>主動野村台灣50</td>
+            <td class="num" data-sort="1372000">1,372,000</td>
+            <td class="num weight-high" data-sort="28.43">28.43%</td>
+            <td class="trend"><span class='trend-flat'>持平</span></td>
+            <td class="num corr" data-sort="-0.25037175152585744"><span class='ret-down'>-0.25%</span></td>
+            <td class="num corr" data-sort="0.47014956914808076"><span class='ret-up'>+0.47%</span></td>
+            <td class="num small">50 檔 / 93.8%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">2</td>
+            <td class="ticker">00991A</td>
+            <td>主動復華未來50</td>
+            <td class="num" data-sort="3600000">3,600,000</td>
+            <td class="num weight-high" data-sort="20.34">20.34%</td>
+            <td class="trend"><span class='trend-flat'>持平</span></td>
+            <td class="num corr" data-sort="1.0222494580457209"><span class='ret-up'>+1.02%</span></td>
+            <td class="num corr" data-sort="1.8103337225292777"><span class='ret-up'>+1.81%</span></td>
+            <td class="num small">50 檔 / 98.1%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">3</td>
+            <td class="ticker">00994A</td>
+            <td>主動第一金台股優</td>
+            <td class="num" data-sort="312999">312,999</td>
+            <td class="num weight-mid" data-sort="15.8">15.80%</td>
+            <td class="trend"><span class='trend-flat'>持平</span></td>
+            <td class="num corr" data-sort="1.8776466483633625"><span class='ret-up'>+1.88%</span></td>
+            <td class="num corr" data-sort="2.617331873342267"><span class='ret-up'>+2.62%</span></td>
+            <td class="num small">37 檔 / 98.6%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">4</td>
+            <td class="ticker">00986A</td>
+            <td>主動台新龍頭成長</td>
+            <td class="num" data-sort="25000">25,000</td>
+            <td class="num weight-low" data-sort="9.0568">9.06%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="0.37119665733973406"><span class='ret-up'>+0.37%</span></td>
+            <td class="num corr" data-sort="0.6137335731728333"><span class='ret-up'>+0.61%</span></td>
+            <td class="num small">27 檔 / 94.1%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">5</td>
+            <td class="ticker">00981A</td>
+            <td>主動統一台股增長</td>
+            <td class="num" data-sort="10039000">10,039,000</td>
+            <td class="num weight-low" data-sort="8.97">8.97%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="1.946650756967827"><span class='ret-up'>+1.95%</span></td>
+            <td class="num corr" data-sort="2.341877740773968"><span class='ret-up'>+2.34%</span></td>
+            <td class="num small">50 檔 / 95.8%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">6</td>
+            <td class="ticker">00400A</td>
+            <td>主動國泰動能高息</td>
+            <td class="num" data-sort="770000">770,000</td>
+            <td class="num weight-low" data-sort="8.76">8.76%</td>
+            <td class="trend"><span class='trend-flat'>持平</span></td>
+            <td class="num corr" data-sort="1.6522426240495047"><span class='ret-up'>+1.65%</span></td>
+            <td class="num corr" data-sort="2.009062157083406"><span class='ret-up'>+2.01%</span></td>
+            <td class="num small">51 檔 / 96.6%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">7</td>
+            <td class="ticker">00995A</td>
+            <td>主動中信台灣卓越</td>
+            <td class="num" data-sort="208000">208,000</td>
+            <td class="num weight-low" data-sort="8.64">8.64%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="1.8975343628873542"><span class='ret-up'>+1.90%</span></td>
+            <td class="num corr" data-sort="2.2722011676232112"><span class='ret-up'>+2.27%</span></td>
+            <td class="num small">58 檔 / 98.6%</td>
+        </tr>
+        <tr data-cat="其他">
+            <td class="num idx">8</td>
+            <td class="ticker">00980A</td>
+            <td>主動野村臺灣優選</td>
+            <td class="num" data-sort="583000">583,000</td>
+            <td class="num weight-low" data-sort="8.6">8.60%</td>
+            <td class="trend"><span class='trend-flat'>持平</span></td>
+            <td class="num corr" data-sort="-0.04585157783910665"><span class='ret-down'>-0.05%</span></td>
+            <td class="num corr" data-sort="0.14406056667473766"><span class='ret-up'>+0.14%</span></td>
+            <td class="num small">47 檔 / 90.8%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">9</td>
+            <td class="ticker">00982A</td>
+            <td>主動群益台灣強棒</td>
+            <td class="num" data-sort="1548000">1,548,000</td>
+            <td class="num weight-low" data-sort="8.48">8.48%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="1.3962397775023172"><span class='ret-up'>+1.40%</span></td>
+            <td class="num corr" data-sort="1.716876801859649"><span class='ret-up'>+1.72%</span></td>
+            <td class="num small">58 檔 / 98.2%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">10</td>
+            <td class="ticker">00996A</td>
+            <td>主動兆豐台灣豐收</td>
+            <td class="num" data-sort="153000">153,000</td>
+            <td class="num weight-low" data-sort="8.2">8.20%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="3.6050159082738675"><span class='ret-up'>+3.61%</span></td>
+            <td class="num corr" data-sort="4.111418260696883"><span class='ret-up'>+4.11%</span></td>
+            <td class="num small">51 檔 / 94.0%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">11</td>
+            <td class="ticker">00993A</td>
+            <td>主動安聯台灣</td>
+            <td class="num" data-sort="440000">440,000</td>
+            <td class="num weight-low" data-sort="7.75">7.75%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="0.5511862169278681"><span class='ret-up'>+0.55%</span></td>
+            <td class="num corr" data-sort="0.7709087058515468"><span class='ret-up'>+0.77%</span></td>
+            <td class="num small">49 檔 / 97.9%</td>
+        </tr>
+        <tr data-cat="其他">
+            <td class="num idx">12</td>
+            <td class="ticker">00992A</td>
+            <td>主動群益科技創新</td>
+            <td class="num" data-sort="1761000">1,761,000</td>
+            <td class="num weight-low" data-sort="7.56">7.56%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="1.7564358220175658"><span class='ret-up'>+1.76%</span></td>
+            <td class="num corr" data-sort="2.068899683999487"><span class='ret-up'>+2.07%</span></td>
+            <td class="num small">48 檔 / 96.1%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">13</td>
+            <td class="ticker">00401A</td>
+            <td>主動摩根台灣鑫收</td>
+            <td class="num" data-sort="113000">113,000</td>
+            <td class="num weight-low" data-sort="7.34">7.34%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="1.2626230394386928"><span class='ret-up'>+1.26%</span></td>
+            <td class="num corr" data-sort="1.5261567028993988"><span class='ret-up'>+1.53%</span></td>
+            <td class="num small">63 檔 / 92.7%</td>
+        </tr>
+        <tr data-cat="其他">
+            <td class="num idx">14</td>
+            <td class="ticker">00987A</td>
+            <td>主動台新優勢成長</td>
+            <td class="num" data-sort="71000">71,000</td>
+            <td class="num weight-low" data-sort="5.1329">5.13%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="2.618442300328905"><span class='ret-up'>+2.62%</span></td>
+            <td class="num corr" data-sort="2.871803457813162"><span class='ret-up'>+2.87%</span></td>
+            <td class="num small">28 檔 / 95.8%</td>
+        </tr>
+        <tr data-cat="台股">
+            <td class="num idx">15</td>
+            <td class="ticker">00984A</td>
+            <td>主動安聯台灣高息</td>
+            <td class="num" data-sort="150000">150,000</td>
+            <td class="num weight-low" data-sort="4.88">4.88%</td>
+            <td class="trend"><span class='trend-meta'>—</span></td>
+            <td class="num corr" data-sort="0.8540917005696258"><span class='ret-up'>+0.85%</span></td>
+            <td class="num corr" data-sort="1.0038116542512137"><span class='ret-up'>+1.00%</span></td>
+            <td class="num small">117 檔 / 98.6%</td>
+        </tr>
+    </tbody>
+  </table>
+
+  <footer>
+    <p class="legend">
+      權重顏色：
+      <span><span class="swatch" style="background:#002AFF"></span>≥20%</span>
+      <span><span class="swatch" style="background:#6C59E6"></span>10–20%</span>
+      <span><span class="swatch" style="background:#9C80E3"></span>&lt;10%</span>
+      <span><span class="swatch" style="background:#b3b3b3"></span>未持有</span>
+    </p>
+    <p>當天增減欄位顯示最新一日 vs 前一交易日的台積電持股股數差（買進為正、賣出為負）。</p>
+    <p>當日漲跌以 yfinance ETF 收盤計算最近一個交易日 vs 前一交易日的單日報酬；
+       「扣台積電後漲跌」為 (r_etf - w · r_2330) / (1 - w)，呈現「假設沒有台積電」這檔 ETF 的當日表現。</p>
+    <p>排程：launchd 週一至週五 16:35（TPE）自動跑 daily_run.py 後重生。點擊欄位標題可排序。</p>
+    <p class="meta">資料更新：2026-05-01 22:50 · 資料來源：各投信網站｜Business Insider Taiwan</p>
+  </footer>
+</div>
+<script>
+(function(){
+  const table = document.getElementById('etf-table');
+  const tbody = table.querySelector('tbody');
+  const ths = table.querySelectorAll('th.sortable');
+  ths.forEach(th => th.addEventListener('click', () => {
+    const col = parseInt(th.dataset.col, 10);
+    const cur = th.classList.contains('sort-asc') ? 'asc'
+              : th.classList.contains('sort-desc') ? 'desc'
+              : null;
+    const next = cur === 'desc' ? 'asc' : 'desc';
+    ths.forEach(x => x.classList.remove('sort-asc','sort-desc'));
+    th.classList.add(next === 'asc' ? 'sort-asc' : 'sort-desc');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a, b) => {
+      const av = parseFloat(a.children[col].dataset.sort);
+      const bv = parseFloat(b.children[col].dataset.sort);
+      const aN = isNaN(av) ? -Infinity : av;
+      const bN = isNaN(bv) ? -Infinity : bv;
+      return next === 'asc' ? aN - bN : bN - aN;
+    });
+    rows.forEach((tr, i) => {
+      tr.children[0].textContent = i + 1;
+      tbody.appendChild(tr);
+    });
+  }));
+})();
+</script>
+</body>
+</html>
