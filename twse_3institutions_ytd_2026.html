@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>三大法人 2026 年初至 5 月 25 日累計買賣超</title>
+<style>
+.bi-chart { font-family: "Heiti TC", "PingFang TC", "Microsoft JhengHei", sans-serif; font-size: 14px; color: #111; max-width: 880px; margin: 0 auto; padding: 20px; }
+.bi-chart .bi-chart__title { font-size: 18px; font-weight: 700; margin: 0 0 6px; color: #002AFF; }
+.bi-chart .bi-chart__sub { font-size: 12px; color: #555; margin-bottom: 18px; }
+.bi-chart table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 16px; }
+.bi-chart th { background: #002AFF; color: #fff; padding: 10px 12px; text-align: left; font-weight: 700; }
+.bi-chart th.num-col { text-align: right; }
+.bi-chart td { padding: 10px 12px; border-bottom: 1px solid #E5E7EB; }
+.bi-chart td.num { text-align: right; font-family: Helvetica, Arial, sans-serif; font-weight: 700; }
+.bi-chart td.dir { text-align: center; font-weight: 700; font-size: 13px; }
+.bi-chart tr.total td { background: #F3F0FF; border-top: 2px solid #6C59E6; font-weight: 700; }
+.bi-chart .buy { color: #C0392B; }
+.bi-chart .sell { color: #16A34A; }
+.bi-chart .month-block { background: #F9FAFB; border-left: 4px solid #6C59E6; padding: 12px 16px; border-radius: 4px; margin-top: 12px; }
+.bi-chart .month-block__title { font-size: 13px; font-weight: 700; color: #6C59E6; margin-bottom: 8px; }
+.bi-chart .month-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; font-size: 13px; border-bottom: 1px dashed #E5E7EB; }
+.bi-chart .month-row:last-child { border-bottom: 0; }
+.bi-chart .month-row .m-label { color: #555; }
+.bi-chart .month-row .m-num { font-family: Helvetica, Arial, sans-serif; font-weight: 700; }
+.bi-chart .month-row.highlight { background: #FEF3F2; padding: 6px 8px; margin: 4px -8px; border-radius: 3px; }
+.bi-chart .src { font-size: 12px; color: #777; margin-top: 12px; font-style: italic; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="bi-chart">
+  <div class="bi-chart__title">三大法人 2026 年初至 5/25 累計買賣超</div>
+  <div class="bi-chart__sub">外資 YTD 仍賣超 4,649 億元，內資投信買超 2,427 億元承接</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>法人別</th>
+        <th class="num-col">累計買賣超（億元）</th>
+        <th style="text-align:center;">方向</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>外資及陸資（不含外資自營商）</td>
+        <td class="num sell">−4,649.3</td>
+        <td class="dir sell">賣超</td>
+      </tr>
+      <tr>
+        <td>投信</td>
+        <td class="num buy">+2,426.7</td>
+        <td class="dir buy">買超</td>
+      </tr>
+      <tr>
+        <td>自營商（自行＋避險）</td>
+        <td class="num sell">−3,031.9</td>
+        <td class="dir sell">賣超</td>
+      </tr>
+      <tr class="total">
+        <td>三大法人合計</td>
+        <td class="num sell">−5,254.5</td>
+        <td class="dir sell">賣超</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="month-block">
+    <div class="month-block__title">外資月度買賣超（不含外資自營商）</div>
+    <div class="month-row"><span class="m-label">1 月</span><span class="m-num buy">+87.7 億</span></div>
+    <div class="month-row"><span class="m-label">2 月</span><span class="m-num buy">+1,259.5 億</span></div>
+    <div class="month-row highlight"><span class="m-label">3 月（年初以來最大壓力）</span><span class="m-num sell">−9,682.1 億</span></div>
+    <div class="month-row"><span class="m-label">4 月</span><span class="m-num buy">+2,481.2 億</span></div>
+    <div class="month-row"><span class="m-label">5 月（至 5/25）</span><span class="m-num buy">+1,204.5 億</span></div>
+  </div>
+
+  <div class="src">資料來源：證交所「BFI82U 三大法人買賣金額統計表」，2026/1/1–5/25 集中市場累計（不含櫃買）。外資自營商買賣金額已併入自營商統計，未重複計入三大法人合計。</div>
+</div>
+</body>
+</html>
