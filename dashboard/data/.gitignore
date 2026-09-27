@@ -1,2 +1,5 @@
 .cache_*/
+!.cache_tax/
+.cache_tax/*
+!.cache_tax/annot_*.json
 *.log
