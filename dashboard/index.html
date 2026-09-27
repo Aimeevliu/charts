@@ -768,19 +768,19 @@ const TAX = {"generated": "2026-09-27T12:55:01", "since": "2023-09-26", "until":
     draw();
   }
   const short=c=>(c||'').replace(/^(最高法院|最高行政法院|憲法法庭) /,'').replace(/（.*）$/,'');
-  const subst=r=>r.substantive!==false&&!/附帶/.test(r.category||'');
+  const subst=r=>r.substantive==='實質涉保險';
   ledger('sup',SUP,{
-    head:R=>{const s=R.filter(subst);const w=s.filter(r=>/保險公司勝/.test(r.winner||'')).length,h=s.filter(r=>/保戶勝/.test(r.winner||'')).length,g=R.filter(r=>r.grand_chamber).length;return '最高法院近 12 個月涉保險裁判 <b>'+R.length+'</b> 件，實質涉保險 <b>'+s.length+'</b> 件；保險公司勝 <b>'+w+'</b>、保戶勝 <b>'+h+'</b>，大法庭裁定 <b>'+g+'</b> 件。'},
+    head:R=>{const s=R.filter(subst);const w=s.filter(r=>/^保險公司勝/.test(r.winner||'')).length,h=s.filter(r=>/^保戶/.test(r.winner||'')).length,g=R.filter(r=>r.grand_chamber).length;return '最高法院近 12 個月涉保險裁判 <b>'+R.length+'</b> 件，實質涉保險 <b>'+s.length+'</b> 件；保險公司勝 <b>'+w+'</b>、保戶勝 <b>'+h+'</b>，大法庭裁定 <b>'+g+'</b> 件。'},
     pts:R=>['保險公司勝多數為「上訴不合法」程序駁回，引用時勿寫成最高法院實體認定。','114 台上 2172（新光人壽，發回）：附約停效與自動墊繳，引保險法第 54 條疑義解釋原則，保價金足以墊繳時期前催告不生效力。','114 台上 2160（國泰人壽）：告知義務第 64 條，是否影響危險估計「尚非僅以……因果關係為斷」。','南山業務員「非屬勞動契約」民事三案，與最高行政法院勞退案見解相反，值得對照。'],
     bar1:['各保險公司件數',r=>r.insurers&&r.insurers.length?r.insurers.map(x=>x.replace(/保險股份有限公司|股份有限公司/g,'')):[]],
     bar2:['爭點類型',r=>r.dispute_type||r.topic||r.category],
-    chip:r=>r.winner?r.winner.replace(/（.*/,''):'—',
-    cols:[['裁判日',r=>r.date],['案號',r=>short(r.caseno)],['保險公司',r=>(r.insurers||[]).map(x=>x.replace(/保險股份有限公司|股份有限公司/g,''))],['爭點',r=>r.issue||r.dispute_type],['勝方',r=>r.winner]],
+    chip:r=>r.substantive||'—',
+    cols:[['裁判日',r=>r.date],['案號',r=>short(r.caseno)],['保險公司',r=>(r.insurers||[]).map(x=>x.replace(/保險股份有限公司|股份有限公司/g,''))],['爭點',r=>r.topic||r.issue],['勝方',r=>r.winner]],
     det:[['當事人',r=>J(r.appellant)+' v '+J(r.appellee)],['險種',r=>r.line],['爭點',r=>r.issue],['主文',r=>r.main],['法院見解',r=>r.legal_point],['案情',r=>r.brief],['結果',r=>r.outcome],['大法庭',r=>r.grand_chamber?'是':''],['核對',r=>r.check]]});
   ledger('con',CON,{
     head:R=>{const j=R.filter(r=>/憲判/.test(r.caseno||r.zi||'')).length;return '憲法法庭近 12 個月涉保險 <b>'+R.length+'</b> 件，憲法判決 <b>'+j+'</b> 件，其餘多為不受理裁定。'},
     pts:R=>['115 年憲判字第 2 號（2026-02-06）：健保法第 85 條補充保費罰鍰固定倍數，個案顯然過苛部分違憲，2 年內修法；修法前法院得不受 1 倍或 3 倍限制。','南山人壽就業務員勞退案聲請（115 審裁 1292）不受理，等於確認最高行政法院「勞動契約」定性。','商業保險（保險法本體）條文近 12 個月無憲法判決。'],
-    bar1:['涉及法律',r=>(r.laws||[]).map(x=>String(x).replace(/[§第].*$/,''))],
+    bar1:['涉及法律',r=>String(r.laws||'').split(/[／、,]/).map(x=>x.replace(/第.*$|§.*$/,'').trim())],
     bar2:['聲請人類型',r=>r.applicant_type],
     chip:r=>r.holding||r.doc_type||r.kind,
     cols:[['日期',r=>r.date],['字號',r=>short(r.caseno)],['聲請人',r=>r.applicant_type],['涉及法律',r=>r.laws],['結論',r=>r.holding]],
