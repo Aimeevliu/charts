@@ -534,14 +534,14 @@ isel.onchange=()=>{state.ins=isel.value;render()};
 // 重點摘要（自動）
 (function(){
   const rate=decided?Math.round(ins/decided*100):0;
-  const holderCases=rows.filter(r=>r._c.k==='holder').map(r=>r.caseno.replace(/（.*）/,'')).join('、');
+  // 2026-10-16 Gia：不再列保戶勝案號串（原本抓全批 rows 含未核，與「已核 N 件」對不上、綠字一大串）
   const ce=Object.entries(courtCount).sort((a,b)=>b[1]-a[1])[0]||['—',0];
   document.getElementById('lead-head').innerHTML=
     '近期已核 '+vrows.length+' 件保險字判決'+(unvN?'（另 '+unvN+' 件腳本新抓、未核，不計入統計）':'')+'，有明確實體勝負的 '+decided+' 件中，<b>保險公司勝 '+ins+
     '</b>、<b class="h">保戶勝 '+hold+'</b>，保險公司勝率約 <b>'+rate+'%</b>。';
   const pts=[];
   pts.push('<span class="wn">核實：</span>全部案件逐案開 FJUD 主文人工核對；程序裁定（命補裁判費、補正、移送、濫訴駁回）'+(DATA.n-decided)+' 件不計入實體勝負母數。');
-  if(hold) pts.push('保戶勝 '+hold+' 件：<span class="hl">'+holderCases+'</span>。爭點分別是重疾除外解釋（有利被保險人）、意外身故主力近因（成大鑑定）、水冷式高頻熱凝療法算不算「手術」與過往按 55% 理賠是否已成默示協議（保險公司稱「融通給付」，法院不採）。');
+  if(hold) pts.push('保戶勝 '+hold+' 件。爭點分別是重疾除外解釋（有利被保險人）、意外身故主力近因（成大鑑定）、水冷式高頻熱凝療法算不算「手術」與過往按 55% 理賠是否已成默示協議（保險公司稱「融通給付」，法院不採）。');
   pts.push('多起保險公司勝的爭點集中在時效、住院／症狀固定認定、據實說明義務；條款文義 vs 保險法 54 條有利解釋是共同戰場。');
   pts.push('審理最多的法院：<b>'+ce[0]+'</b>（'+ce[1]+' 件）。本批為近期示範批次，樣本小、僅供方向。');
   document.getElementById('lead-pts').innerHTML=pts.map(p=>'<li>'+p+'</li>').join('');
