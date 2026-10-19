@@ -1,12 +1,12 @@
 {
- "generated": "2026-10-15T20:09:36",
+ "generated": "2026-10-19T08:31:10",
  "court": "最高行政法院",
- "since": "2025-10-15",
- "until": "2026-10-15",
+ "since": "2025-10-19",
+ "until": "2026-10-19",
  "keyword": "保險",
- "total_hits": 358,
- "n": 89,
- "excluded_incidental": 269,
+ "total_hits": 355,
+ "n": 88,
+ "excluded_incidental": 267,
  "note": "分類/勝方為啟發式；自然人已去識別化；引用前人工核主文",
  "rows": [
   {
@@ -3119,40 +3119,6 @@
    "verification_status": "unverified",
    "link": "https://judgment.judicial.gov.tw/FJUD/data.aspx?ty=JD&id=TPAA%2c114%2c%e8%81%b2%e5%86%8d%2c629%2c20251028%2c1&ot=in",
    "id": "TPAA,114,聲再,629,20251028,1"
-  },
-  {
-   "court": "最高行政法院",
-   "year": "114",
-   "zi": "上",
-   "no": "208",
-   "date": "2025-10-15",
-   "kind": "裁定",
-   "caseno": "最高行政法院 114年度上字第208號裁定（2025-10-15）",
-   "cause": "全民健康保險",
-   "appellant": [
-    "鄭國揚即長榮耳鼻喉科診所"
-   ],
-   "appellee": [
-    "衛生福利部中央健康保險署"
-   ],
-   "appellant_type": "自然人",
-   "appellee_type": "社保機關/政府",
-   "vs_fsc": false,
-   "insurers": [],
-   "sub": "",
-   "outcome": "上訴駁回",
-   "winner": "社保機關/政府（被上訴/相對方）勝",
-   "amount": "",
-   "amount_in_reasons": "",
-   "category": "社會保險",
-   "n_保險": 14,
-   "main": "一、上訴駁回。二、上訴審訴訟費用由上訴人負擔。",
-   "issue": "",
-   "brief": "二、緣上訴人前於民國99年至101年間，因任負責醫師之「長榮耳鼻喉科診所」（下稱系爭診所），及其任實際負責人之大成中醫診所有不實刷取保險對象全民健康保險（下稱健保）卡或以異常代碼自創保險對象就醫資料，虛報醫療費用情事，經被上訴人審認違反行為時全民健康保險法第72條、行為時全民健康保險醫事服務機構特約及管理辦法（下稱特管",
-   "check": "主文由腳本擷取，未逐字人工核",
-   "verification_status": "unverified",
-   "link": "https://judgment.judicial.gov.tw/FJUD/data.aspx?ty=JD&id=TPAA%2c114%2c%e4%b8%8a%2c208%2c20251015%2c1&ot=in",
-   "id": "TPAA,114,上,208,20251015,1"
   }
  ]
 }
